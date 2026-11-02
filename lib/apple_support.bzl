@@ -326,6 +326,9 @@ def _platform_constraint_attrs():
         "_apple_simulator_constraint": attr.label(
             default = Label("//constraints:simulator"),
         ),
+        "_apple_catalyst_constraint": attr.label(
+            default = Label("//constraints:catalyst"),
+        ),
     }
 
 def _run(
@@ -582,9 +585,13 @@ def _target_environment_from_rule_ctx(
         return "device"
     elif ctx.target_platform_has_constraint(simulator_constraint):
         return "simulator"
+    elif ctx.target_platform_has_constraint(
+        ctx.attr._apple_catalyst_constraint[platform_common.ConstraintValueInfo],
+    ):
+        return "catalyst"
     if not fail_on_missing_constraint:
         return None
-    fail("ERROR: A valid Apple environment (device, simulator) constraint could not be found from" +
+    fail("ERROR: A valid Apple environment (device, simulator, catalyst) constraint could not be found from" +
          " the resolved toolchain.")
 
 def _target_os_from_rule_ctx(
@@ -637,6 +644,8 @@ def _platform_from_info(*, apple_platform_info):
             return apple_common.platform.ios_device
         elif apple_platform_info.target_environment == "simulator":
             return apple_common.platform.ios_simulator
+        elif apple_platform_info.target_environment == "catalyst":
+            return apple_common.platform.catalyst
     elif apple_platform_info.target_os == "macos":
         return apple_common.platform.macos
     elif apple_platform_info.target_os == "tvos":

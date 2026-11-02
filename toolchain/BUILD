@@ -141,7 +141,10 @@ cc_feature(
 
 cc_feature(
     name = "sysroot_feature",
-    args = [":sysroot_args"],
+    args = [
+        ":sysroot_args",
+        ":catalyst_include_args",
+    ],
     feature_name = "sysroot",
 )
 
@@ -155,10 +158,30 @@ cc_args(
     args = [
         "-isysroot",
         "__BAZEL_XCODE_SDKROOT__",
+    ] + select({
+        # Mac Catalyst frameworks overlay the macOS SDK ones, as in Xcode.
+        "//constraints:catalyst": [
+            "-F__BAZEL_XCODE_SDKROOT__/System/iOSSupport/System/Library/Frameworks",
+            "-L__BAZEL_XCODE_SDKROOT__/System/iOSSupport/usr/lib",
+        ],
+        "//conditions:default": [],
+    }) + [
         "-F__BAZEL_XCODE_SDKROOT__/System/Library/Frameworks",
         "-F{PLATFORM_FRAMEWORKS}",  # NOTE: This is lazy so cquery doesn't show the right value
     ],
     toolchains = [":dynamic_toolchain_info"],
+)
+
+cc_args(
+    name = "catalyst_include_args",
+    actions = ["@rules_cc//cc/toolchains/actions:compile_actions"],
+    args = select({
+        "//constraints:catalyst": [
+            "-isystem",
+            "__BAZEL_XCODE_SDKROOT__/System/iOSSupport/usr/include",
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 # TODO: This is overriding a magic name from the default feature set but isn't reading the upstream variable

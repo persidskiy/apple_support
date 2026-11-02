@@ -19,6 +19,8 @@ def _sdk_version_for_platform(xcode_config, platform_type):
         return xcode_config.sdk_version_for_platform(apple_common.platform.watchos_device)
     elif platform_type == apple_common.platform_type.macos:
         return xcode_config.sdk_version_for_platform(apple_common.platform.macos)
+    elif platform_type == apple_common.platform_type.catalyst:
+        return xcode_config.sdk_version_for_platform(apple_common.platform.catalyst)
     else:
         fail("Unhandled platform type: {}".format(platform_type))
 
@@ -39,7 +41,7 @@ def _sdk_name(platform_type, is_simulator):
         return "AppleTVSimulator"
     elif platform_type == apple_common.platform_type.tvos:
         return "AppleTVOS"
-    elif platform_type == apple_common.platform_type.macos:
+    elif platform_type in [apple_common.platform_type.macos, apple_common.platform_type.catalyst]:
         return "MacOSX"
     else:
         fail("Unhandled platform type: {}".format(platform_type))
@@ -83,6 +85,9 @@ def _dynamic_toolchain_info_impl(ctx):
     is_simulator = ctx.target_platform_has_constraint(ctx.attr._simulator[platform_common.ConstraintValueInfo])
     if is_simulator:
         triple_suffix = "-simulator"
+    elif apple_platform_info.target_environment == "catalyst":
+        triple_suffix = "-macabi"
+        platform_type = apple_common.platform_type.catalyst
     else:
         triple_suffix = ""
 

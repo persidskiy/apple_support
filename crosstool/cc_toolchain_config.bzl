@@ -59,6 +59,8 @@ def _sdk_version_for_platform(xcode_config, platform_type):
         return xcode_config.sdk_version_for_platform(apple_common.platform.watchos_device)
     elif platform_type == apple_common.platform_type.macos:
         return xcode_config.sdk_version_for_platform(apple_common.platform.macos)
+    elif platform_type == apple_common.platform_type.catalyst:
+        return xcode_config.sdk_version_for_platform(apple_common.platform.catalyst)
     else:
         fail("Unhandled platform type: {}".format(platform_type))
 
@@ -79,7 +81,7 @@ def _sdk_name(platform_type, is_simulator):
         return "AppleTVSimulator"
     elif platform_type == apple_common.platform_type.tvos:
         return "AppleTVOS"
-    elif platform_type == apple_common.platform_type.macos:
+    elif platform_type in [apple_common.platform_type.macos, apple_common.platform_type.catalyst]:
         return "MacOSX"
     else:
         fail("Unhandled platform type: {}".format(platform_type))
@@ -87,6 +89,8 @@ def _sdk_name(platform_type, is_simulator):
 def _impl(ctx):
     if ctx.attr.cpu.startswith("darwin"):
         platform_type = apple_common.platform_type.macos
+    elif ctx.attr.cpu.startswith("catalyst"):
+        platform_type = apple_common.platform_type.catalyst
     elif ctx.attr.cpu.startswith("ios"):
         platform_type = apple_common.platform_type.ios
     elif ctx.attr.cpu.startswith("tvos"):
@@ -144,6 +148,10 @@ please file an issue at https://github.com/bazelbuild/apple_support/issues/new
         target_system_name = "arm64-apple-macosx{}".format(target_os_version)
     elif (ctx.attr.cpu == "darwin_arm64e"):
         target_system_name = "arm64e-apple-macosx{}".format(target_os_version)
+    elif (ctx.attr.cpu == "catalyst_arm64"):
+        target_system_name = "arm64-apple-ios{}-macabi".format(target_os_version)
+    elif (ctx.attr.cpu == "catalyst_x86_64"):
+        target_system_name = "x86_64-apple-ios{}-macabi".format(target_os_version)
     elif (ctx.attr.cpu == "tvos_x86_64"):
         target_system_name = "x86_64-apple-tvos{}-simulator".format(target_os_version)
         is_simulator = True
@@ -499,6 +507,8 @@ please file an issue at https://github.com/bazelbuild/apple_support/issues/new
         ctx.attr.cpu == "ios_arm64e" or
         ctx.attr.cpu == "ios_sim_arm64" or
         ctx.attr.cpu == "ios_x86_64" or
+        ctx.attr.cpu == "catalyst_arm64" or
+        ctx.attr.cpu == "catalyst_x86_64" or
         ctx.attr.cpu == "watchos_arm64_32" or
         ctx.attr.cpu == "watchos_device_arm64" or
         ctx.attr.cpu == "watchos_device_arm64e" or
@@ -1198,6 +1208,8 @@ please file an issue at https://github.com/bazelbuild/apple_support/issues/new
         ctx.attr.cpu == "ios_arm64e" or
         ctx.attr.cpu == "ios_x86_64" or
         ctx.attr.cpu == "ios_sim_arm64" or
+        ctx.attr.cpu == "catalyst_arm64" or
+        ctx.attr.cpu == "catalyst_x86_64" or
         ctx.attr.cpu == "tvos_arm64" or
         ctx.attr.cpu == "tvos_x86_64" or
         ctx.attr.cpu == "tvos_sim_arm64" or

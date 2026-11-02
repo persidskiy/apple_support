@@ -1,6 +1,16 @@
 """Defines all the Apple CPUs and their constraints"""
 
 APPLE_PLATFORMS_CONSTRAINTS = {
+    "catalyst_arm64": [
+        "@platforms//os:ios",
+        "@platforms//cpu:arm64",
+        Label("//constraints:catalyst"),
+    ],
+    "catalyst_x86_64": [
+        "@platforms//os:ios",
+        "@platforms//cpu:x86_64",
+        Label("//constraints:catalyst"),
+    ],
     "darwin_arm64": [
         "@platforms//os:macos",
         "@platforms//cpu:arm64",
@@ -101,6 +111,8 @@ APPLE_SIMULATOR_CPUS = [
 ]
 
 CPU_TO_DEFAULT_PLATFORM_NAME = {
+    "catalyst_arm64": "catalyst_arm64",
+    "catalyst_x86_64": "catalyst_x86_64",
     "darwin_arm64": "macos_arm64",
     "darwin_arm64e": "macos_arm64e",
     "darwin_x86_64": "macos_x86_64",
